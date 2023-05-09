@@ -34,3 +34,18 @@ func (repo *BookingRepository) Create(booking model.Booking) model.RequestMessag
 		Message: "Success!",
 	}
 }
+
+func (repo *BookingRepository) GetAll() ([]model.Booking, model.RequestMessage) {
+	var bookings []model.Booking
+	dbResult := repo.DatabaseConnection.Find(&bookings)
+
+	if dbResult.Error != nil {
+		return nil, model.RequestMessage{
+			Message: "An error occurred, please try again!",
+		}
+	}
+
+	return bookings, model.RequestMessage{
+		Message: "Success!",
+	}
+}

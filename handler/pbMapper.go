@@ -2,6 +2,7 @@ package handler
 
 import (
 	"booking-service/model"
+	"time"
 
 	pb "github.com/XML-organization/common/proto/booking_service"
 
@@ -27,12 +28,42 @@ func mapBookingFromCreateBookingRequest(booking *pb.CreateBookingRequest) model.
 		panic(err)
 	}
 
+	layout := "2006-01-02"
+
+	startDate, err := time.Parse(layout, booking.StartDate)
+	if err != nil {
+		panic(err)
+	}
+
+	endDate, err := time.Parse(layout, booking.EndDate)
+	if err != nil {
+		panic(err)
+	}
+
 	return model.Booking{
 		ID:             bookingID,
 		AccomodationID: accomodationID,
-		StartDate:      booking.StartDate,
-		EndDate:        booking.EndDate,
+		StartDate:      startDate,
+		EndDate:        endDate,
 		GuestNumber:    num,
 		Status:         model.Status(booking.Status.Number()),
+	}
+}
+
+func mapBookingToCreateBookingRequest(booking *model.Booking) *pb.CreateBookingRequest {
+	bookingID := booking.ID.String()
+	accomodationID := booking.AccomodationID.String()
+	guestNumber := strconv.Itoa(booking.GuestNumber)
+	status := pb.Status(pb.Status_value[strconv.Itoa(int(booking.Status))])
+	startDate := booking.StartDate.Format("2006-01-02")
+	endDate := booking.EndDate.Format("2006-01-02")
+
+	return &pb.CreateBookingRequest{
+		Id:             bookingID,
+		AccomodationID: accomodationID,
+		StartDate:      startDate,
+		EndDate:        endDate,
+		GuestNumber:    guestNumber,
+		Status:         status,
 	}
 }

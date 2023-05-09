@@ -67,8 +67,9 @@ func (server *Server) initPostgresClient() *gorm.DB {
 		server.config.BookingDBPass, server.config.BookingDBName,
 		server.config.BookingDBPort)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("INIT POSTGRES CLIENT PUCAAAA")
 	}
+	println("PRESKOCIO IF")
 	return client
 }
 
