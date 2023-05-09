@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"booking-service/startup"
+	cfg "booking-service/startup/config"
+)
 
 func main() {
-	fmt.Println("Hello, world!")
+	config := cfg.NewConfig()
+	server := startup.NewServer(config)
+	server.Start()
 }
