@@ -15,6 +15,7 @@ type Config struct {
 	NatsPass                 string
 	CreateUserCommandSubject string
 	CreateUserReplySubject   string
+	Address                  string
 }
 
 func NewConfig() *Config {
@@ -31,5 +32,6 @@ func NewConfig() *Config {
 		NatsPass:                 os.Getenv("NATS_PASS"),
 		CreateUserCommandSubject: os.Getenv("CREATE_USER_COMMAND_SUBJECT"),
 		CreateUserReplySubject:   os.Getenv("CREATE_USER_REPLY_SUBJECT"),
+		Address:                  os.Getenv("BOOKING_SERVICE_ADDRESS"),
 	}
 }

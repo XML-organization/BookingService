@@ -9,8 +9,8 @@ import (
 type Booking struct {
 	ID             uuid.UUID `json:"id"`
 	AccomodationID uuid.UUID `json:"accomodationID"`
-	StartDate      time.Time `json:"startDate" gorm:"not null;type:string"`
-	EndDate        time.Time `json:"endDate" gorm:"not null;type:string"`
+	StartDate      time.Time `json:"startDate"`
+	EndDate        time.Time `json:"endDate"`
 	GuestNumber    int       `json:"guestNumber" gorm:"not null"`
 	Status         Status    `json:"status"`
 }

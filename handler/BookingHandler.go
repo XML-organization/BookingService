@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	greet "booking-service/proto/greet"
 	"booking-service/service"
 
 	booking "github.com/XML-organization/common/proto/booking_service"
@@ -51,4 +52,12 @@ func (bookingHandler *BookingHandler) GetAll(ctx context.Context, empty *booking
 	}
 
 	return &response, nil
+}
+
+//Test!
+
+func (h BookingHandler) Greet(ctx context.Context, request *greet.Request) (*greet.Response, error) {
+	return &greet.Response{
+		Greeting: fmt.Sprintf("Hi %s!", request.Name),
+	}, nil
 }
