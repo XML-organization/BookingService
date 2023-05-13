@@ -40,13 +40,15 @@ func mapBookingFromCreateBookingRequest(booking *pb.CreateBookingRequest) model.
 		panic(err)
 	}
 
+	statusInt, err := strconv.Atoi(booking.Status)
+
 	return model.Booking{
 		ID:             bookingID,
 		AccomodationID: accomodationID,
 		StartDate:      startDate,
 		EndDate:        endDate,
 		GuestNumber:    num,
-		Status:         model.Status(booking.Status.Number()),
+		Status:         model.Status(statusInt),
 	}
 }
 
@@ -54,9 +56,18 @@ func mapBookingToCreateBookingRequest(booking *model.Booking) *pb.CreateBookingR
 	bookingID := booking.ID.String()
 	accomodationID := booking.AccomodationID.String()
 	guestNumber := strconv.Itoa(booking.GuestNumber)
-	status := pb.Status(pb.Status_value[strconv.Itoa(int(booking.Status))])
 	startDate := booking.StartDate.Format("2006-01-02")
 	endDate := booking.EndDate.Format("2006-01-02")
+
+	var statusString string
+	switch booking.Status {
+	case model.CONFIRMED:
+		statusString = "CONFIRMED"
+	case model.PENDING:
+		statusString = "PENDING"
+	case model.DECLINED:
+		statusString = "DECLINED"
+	}
 
 	return &pb.CreateBookingRequest{
 		Id:             bookingID,
@@ -64,6 +75,6 @@ func mapBookingToCreateBookingRequest(booking *model.Booking) *pb.CreateBookingR
 		StartDate:      startDate,
 		EndDate:        endDate,
 		GuestNumber:    guestNumber,
-		Status:         status,
+		Status:         statusString,
 	}
 }
