@@ -3,6 +3,7 @@ package repository
 import (
 	"booking-service/model"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -48,4 +49,47 @@ func (repo *BookingRepository) GetAll() ([]model.Booking, model.RequestMessage) 
 	return bookings, model.RequestMessage{
 		Message: "Success!",
 	}
+}
+
+func (repo *BookingRepository) GetAllPending() ([]model.Booking, model.RequestMessage) {
+	var bookings []model.Booking
+	dbResult := repo.DatabaseConnection.Find(&bookings, "status = ?", 1)
+
+	if dbResult.Error != nil {
+		return nil, model.RequestMessage{
+			Message: "An error occurred, please try again!",
+		}
+	}
+
+	return bookings, model.RequestMessage{
+		Message: "Success!",
+	}
+}
+
+func (repo *BookingRepository) FindById(id uuid.UUID) (model.Booking, error) {
+	booking := model.Booking{}
+
+	dbResult := repo.DatabaseConnection.First(&booking, "id = ?", id)
+
+	if dbResult != nil {
+		return booking, dbResult.Error
+	}
+
+	return booking, nil
+}
+
+func (repo *BookingRepository) UpdateBooking(booking model.Booking) error {
+
+	sqlStatementUser := `
+		UPDATE bookings
+		SET status = $2
+		WHERE id = $1;`
+
+	dbResult := repo.DatabaseConnection.Exec(sqlStatementUser, booking.ID, booking.Status)
+
+	if dbResult.Error != nil {
+		return dbResult.Error
+	}
+
+	return nil
 }

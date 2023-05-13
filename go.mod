@@ -5,7 +5,7 @@ go 1.20
 replace github.com/XML-organization/common => ../common
 
 require (
-	github.com/XML-organization/common v1.0.1-0.20230507161618-15f00ac411f2
+	github.com/XML-organization/common v1.0.1-0.20230513064045-bf8d1869bd52
 	github.com/google/uuid v1.3.0
 	google.golang.org/grpc v1.54.0
 	gorm.io/gorm v1.25.0
