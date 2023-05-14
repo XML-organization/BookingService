@@ -158,3 +158,24 @@ func (bookingHandler *BookingHandler) Confirm(ctx context.Context, in *pb.Create
 		Message: message.Message,
 	}, err
 }
+
+func (handler *BookingHandler) GetAllReservations(ctx context.Context, request *pb.ReservationRequest) (*pb.ReservationResponse, error) {
+	accomodationID, err := uuid.Parse(request.AccomodationId)
+	if err != nil {
+		return nil, err
+	}
+
+	reservations, err := handler.BookingService.GetAllReservations(accomodationID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &pb.ReservationResponse{
+		Reservations: []*pb.CreateBookingRequest{},
+	}
+	for _, availability := range reservations {
+		current := mapBookingToCreateBookingRequest(&availability)
+		response.Reservations = append(response.Reservations, current)
+	}
+	return response, nil
+}
