@@ -93,3 +93,12 @@ func (repo *BookingRepository) UpdateBooking(booking model.Booking) error {
 
 	return nil
 }
+
+func (repo *BookingRepository) GetAllReservations(accomodationID uuid.UUID) ([]model.Booking, error) {
+	reservations := []model.Booking{}
+	result := repo.DatabaseConnection.Where("accomodation_id = ?", accomodationID).Find(&reservations)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return reservations, nil
+}

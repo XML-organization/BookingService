@@ -3,6 +3,8 @@ package service
 import (
 	"booking-service/model"
 	"booking-service/repository"
+
+	"github.com/google/uuid"
 )
 
 type BookingService struct {
@@ -87,4 +89,12 @@ func (service *BookingService) IfAvailable(params model.AvailabilityParams) (mod
 	}
 
 	return model.IfAvailable{Message: true}, model.RequestMessage{Message: "Available!"}
+}
+
+func (service *BookingService) GetAllReservations(accomodationID uuid.UUID) ([]model.Booking, error) {
+	reservations, err := service.BookingRepo.GetAllReservations(accomodationID)
+	if err != nil {
+		return nil, err
+	}
+	return reservations, nil
 }
