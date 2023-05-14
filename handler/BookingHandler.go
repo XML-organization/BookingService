@@ -179,3 +179,15 @@ func (handler *BookingHandler) GetAllReservations(ctx context.Context, request *
 	}
 	return response, nil
 }
+
+func (bookingHandler *BookingHandler) CanceledReservation(ctx context.Context, in *pb.CanceledBookingRequest) (*pb.CanceledBookingResponse, error) {
+
+	bookingId := mapBookingFromCanceledBookingRequest(in)
+
+	message, err := bookingHandler.BookingService.CanceledReservation(bookingId)
+	response := pb.CanceledBookingResponse{
+		Message: message.Message,
+	}
+
+	return &response, err
+}

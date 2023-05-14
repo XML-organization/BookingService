@@ -102,3 +102,22 @@ func (repo *BookingRepository) GetAllReservations(accomodationID uuid.UUID) ([]m
 	}
 	return reservations, nil
 }
+
+func (repo *BookingRepository) CanceledReservation(reservationId uuid.UUID) model.RequestMessage {
+
+	sqlStatementBooking := `
+		UPDATE booking
+		SET status = $2
+		WHERE id = $1;`
+
+	dbResult1 := repo.DatabaseConnection.Exec(sqlStatementBooking, reservationId, model.DECLINED)
+
+	if dbResult1.Error != nil {
+		return model.RequestMessage{
+			Message: "An error occured, please try again!",
+		}
+	}
+	return model.RequestMessage{
+		Message: "Success!",
+	}
+}
