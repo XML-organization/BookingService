@@ -115,3 +115,11 @@ func (service *BookingService) CanceledReservation(reservationId uuid.UUID) (mod
 	}
 	return response, nil
 }
+
+func (service *BookingService) GetUserReservations(userID uuid.UUID) ([]model.Booking, error) {
+	reservations, err := service.BookingRepo.GetUserReservations(userID)
+	if err != nil {
+		return nil, err
+	}
+	return reservations, nil
+}

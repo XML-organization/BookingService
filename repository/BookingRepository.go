@@ -121,3 +121,12 @@ func (repo *BookingRepository) CanceledReservation(reservationId uuid.UUID) mode
 		Message: "Success!",
 	}
 }
+
+func (repo *BookingRepository) GetUserReservations(userId uuid.UUID) ([]model.Booking, error) {
+	reservations := []model.Booking{}
+	result := repo.DatabaseConnection.Where("user_id = ?", userId).Find(&reservations)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return reservations, nil
+}
