@@ -23,6 +23,11 @@ func mapBookingFromCreateBookingRequest(booking *pb.CreateBookingRequest) model.
 		panic(err)
 	}
 
+	userID, err := uuid.Parse(booking.UserID)
+	if err != nil {
+		panic(err)
+	}
+
 	num, err := strconv.Atoi(booking.GuestNumber)
 	if err != nil {
 		panic(err)
@@ -45,6 +50,7 @@ func mapBookingFromCreateBookingRequest(booking *pb.CreateBookingRequest) model.
 	return model.Booking{
 		ID:             bookingID,
 		AccomodationID: accomodationID,
+		UserID:         userID,
 		StartDate:      startDate,
 		EndDate:        endDate,
 		GuestNumber:    num,
@@ -55,6 +61,7 @@ func mapBookingFromCreateBookingRequest(booking *pb.CreateBookingRequest) model.
 func mapBookingToCreateBookingRequest(booking *model.Booking) *pb.CreateBookingRequest {
 	bookingID := booking.ID.String()
 	accomodationID := booking.AccomodationID.String()
+	userID := booking.UserID.String()
 	guestNumber := strconv.Itoa(booking.GuestNumber)
 	startDate := booking.StartDate.Format("2006-01-02")
 	endDate := booking.EndDate.Format("2006-01-02")
@@ -72,6 +79,7 @@ func mapBookingToCreateBookingRequest(booking *model.Booking) *pb.CreateBookingR
 	return &pb.CreateBookingRequest{
 		Id:             bookingID,
 		AccomodationID: accomodationID,
+		UserID:         userID,
 		StartDate:      startDate,
 		EndDate:        endDate,
 		GuestNumber:    guestNumber,
