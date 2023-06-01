@@ -180,7 +180,7 @@ func (handler *BookingHandler) GetAllReservations(ctx context.Context, request *
 	return response, nil
 }
 
-func (bookingHandler *BookingHandler) CanceledReservation(ctx context.Context, in *pb.CanceledBookingRequest) (*pb.CanceledBookingResponse, error) {
+func (bookingHandler *BookingHandler) CanceledBooking(ctx context.Context, in *pb.CanceledBookingRequest) (*pb.CanceledBookingResponse, error) {
 
 	bookingId := mapBookingFromCanceledBookingRequest(in)
 

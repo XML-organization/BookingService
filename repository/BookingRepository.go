@@ -106,7 +106,7 @@ func (repo *BookingRepository) GetAllReservations(accomodationID uuid.UUID) ([]m
 func (repo *BookingRepository) CanceledReservation(reservationId uuid.UUID) model.RequestMessage {
 
 	sqlStatementBooking := `
-		UPDATE booking
+		UPDATE bookings
 		SET status = $2
 		WHERE id = $1;`
 
