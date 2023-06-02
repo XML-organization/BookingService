@@ -86,3 +86,13 @@ func mapBookingToCreateBookingRequest(booking *model.Booking) *pb.CreateBookingR
 		Status:         statusString,
 	}
 }
+
+func mapBookingFromCanceledBookingRequest(booking *pb.CanceledBookingRequest) uuid.UUID {
+
+	bookingID, err := uuid.Parse(booking.Id)
+	if err != nil {
+		panic(err)
+	}
+
+	return bookingID
+}

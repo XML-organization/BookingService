@@ -119,3 +119,31 @@ func (repo *BookingRepository) GetAllReservations(accomodationID uuid.UUID) ([]m
 	}
 	return reservations, nil
 }
+
+func (repo *BookingRepository) CanceledReservation(reservationId uuid.UUID) model.RequestMessage {
+
+	sqlStatementBooking := `
+		UPDATE bookings
+		SET status = $2
+		WHERE id = $1;`
+
+	dbResult1 := repo.DatabaseConnection.Exec(sqlStatementBooking, reservationId, model.DECLINED)
+
+	if dbResult1.Error != nil {
+		return model.RequestMessage{
+			Message: "An error occured, please try again!",
+		}
+	}
+	return model.RequestMessage{
+		Message: "Success!",
+	}
+}
+
+func (repo *BookingRepository) GetUserReservations(userId uuid.UUID) ([]model.Booking, error) {
+	reservations := []model.Booking{}
+	result := repo.DatabaseConnection.Where("user_id = ?", userId).Find(&reservations)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return reservations, nil
+}

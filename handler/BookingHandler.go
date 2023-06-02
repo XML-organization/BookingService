@@ -185,3 +185,36 @@ func (handler *BookingHandler) GetAllReservations(ctx context.Context, request *
 	}
 	return response, nil
 }
+
+func (bookingHandler *BookingHandler) CanceledBooking(ctx context.Context, in *pb.CanceledBookingRequest) (*pb.CanceledBookingResponse, error) {
+
+	bookingId := mapBookingFromCanceledBookingRequest(in)
+
+	message, err := bookingHandler.BookingService.CanceledReservation(bookingId)
+	response := pb.CanceledBookingResponse{
+		Message: message.Message,
+	}
+
+	return &response, err
+}
+
+func (handler *BookingHandler) GetUserReservations(ctx context.Context, request *pb.UserReservationRequest) (*pb.ReservationResponse, error) {
+	userID, err := uuid.Parse(request.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	reservations, err := handler.BookingService.GetUserReservations(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &pb.ReservationResponse{
+		Reservations: []*pb.CreateBookingRequest{},
+	}
+	for _, availability := range reservations {
+		current := mapBookingToCreateBookingRequest(&availability)
+		response.Reservations = append(response.Reservations, current)
+	}
+	return response, nil
+}

@@ -3,6 +3,7 @@ package service
 import (
 	"booking-service/model"
 	"booking-service/repository"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -98,6 +99,30 @@ func (service *BookingService) IfAvailable(params model.AvailabilityParams) (mod
 
 func (service *BookingService) GetAllReservations(accomodationID uuid.UUID) ([]model.Booking, error) {
 	reservations, err := service.BookingRepo.GetAllReservations(accomodationID)
+	if err != nil {
+		return nil, err
+	}
+	return reservations, nil
+}
+
+func (service *BookingService) CanceledReservation(reservationId uuid.UUID) (model.RequestMessage, error) {
+	reservation, err := service.BookingRepo.FindById(reservationId)
+	println("Errorin FindById in booking: ", err)
+
+	if time.Now().AddDate(0, 0, -1).Before(reservation.StartDate) {
+		response := model.RequestMessage{
+			Message: service.BookingRepo.CanceledReservation(reservationId).Message,
+		}
+		return response, nil
+	}
+	response := model.RequestMessage{
+		Message: "The time in which you can cancel the reservation has passed!",
+	}
+	return response, nil
+}
+
+func (service *BookingService) GetUserReservations(userID uuid.UUID) ([]model.Booking, error) {
+	reservations, err := service.BookingRepo.GetUserReservations(userID)
 	if err != nil {
 		return nil, err
 	}
