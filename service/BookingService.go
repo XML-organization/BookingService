@@ -17,6 +17,11 @@ func NewBookingService(repo *repository.BookingRepository) *BookingService {
 	}
 }
 
+func (service *BookingService) GuestHasReservationInPast(ids []string, guestId string) string {
+
+	return service.BookingRepo.GuestHasReservationInPast(ids, guestId)
+}
+
 func (service *BookingService) CreateBooking(booking model.Booking) (model.RequestMessage, error) {
 
 	response := model.RequestMessage{

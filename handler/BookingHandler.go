@@ -28,6 +28,12 @@ func NewBookingHandler(service *service.BookingService) *BookingHandler {
 	}
 }
 
+func (handler *BookingHandler) GuestHasReservationInPast(ctx context.Context, in *pb.GuestHasReservationInPastRequest) (*pb.GuestHasReservationInPastResponse, error) {
+	return &pb.GuestHasReservationInPastResponse{
+		Message: handler.BookingService.GuestHasReservationInPast(in.AccomodationsId, in.GuestId),
+	}, nil
+}
+
 func (bookingHandler *BookingHandler) CreateBooking(ctx context.Context, in *pb.CreateBookingRequest) (*pb.CreateBookingResponse, error) {
 
 	booking := mapBookingFromCreateBookingRequest(in)

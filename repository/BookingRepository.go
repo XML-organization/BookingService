@@ -22,6 +22,23 @@ func NewBookingRepository(db *gorm.DB) *BookingRepository {
 	}
 }
 
+// ...
+
+func (repo *BookingRepository) GuestHasReservationInPast(ids []string, guestId string) string {
+	var bookings []model.Booking
+	if err := repo.DatabaseConnection.Where("accomodation_id IN (?)", ids).Find(&bookings).Error; err != nil {
+		return "dont have"
+	}
+
+	for _, booking := range bookings {
+		if booking.UserID.String() == guestId && booking.Status == 0 {
+			return "Have"
+		}
+	}
+
+	return "dont have"
+}
+
 func (repo *BookingRepository) Create(booking model.Booking) model.RequestMessage {
 	dbResult := repo.DatabaseConnection.Save(booking)
 
