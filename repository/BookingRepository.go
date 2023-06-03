@@ -31,7 +31,11 @@ func (repo *BookingRepository) GuestHasReservationInPast(ids []string, guestId s
 	}
 
 	for _, booking := range bookings {
+		println(booking.Status)
 		if booking.UserID.String() == guestId && booking.Status == 0 {
+			println("Booking user id: " + booking.UserID.String())
+			println("Guest id: " + guestId)
+			println("haveeeee")
 			return "Have"
 		}
 	}
