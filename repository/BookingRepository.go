@@ -2,6 +2,7 @@ package repository
 
 import (
 	"booking-service/model"
+	"log"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -14,6 +15,7 @@ type BookingRepository struct {
 func NewBookingRepository(db *gorm.DB) *BookingRepository {
 	err := db.AutoMigrate(&model.Booking{})
 	if err != nil {
+		log.Println(err)
 		return nil
 	}
 
@@ -27,6 +29,7 @@ func NewBookingRepository(db *gorm.DB) *BookingRepository {
 func (repo *BookingRepository) GuestHasReservationInPast(ids []string, guestId string) string {
 	var bookings []model.Booking
 	if err := repo.DatabaseConnection.Where("accomodation_id IN (?)", ids).Find(&bookings).Error; err != nil {
+		log.Println(err)
 		return "dont have"
 	}
 
@@ -47,6 +50,7 @@ func (repo *BookingRepository) Create(booking model.Booking) model.RequestMessag
 	dbResult := repo.DatabaseConnection.Save(booking)
 
 	if dbResult.Error != nil {
+		log.Println(dbResult.Error)
 		return model.RequestMessage{
 			Message: "An error occured, please try again!",
 		}
@@ -62,6 +66,7 @@ func (repo *BookingRepository) GetAll() ([]model.Booking, model.RequestMessage) 
 	dbResult := repo.DatabaseConnection.Find(&bookings)
 
 	if dbResult.Error != nil {
+		log.Println(dbResult.Error)
 		return nil, model.RequestMessage{
 			Message: "An error occurred, please try again!",
 		}
@@ -77,6 +82,7 @@ func (repo *BookingRepository) GetAllPending() ([]model.Booking, model.RequestMe
 	dbResult := repo.DatabaseConnection.Find(&bookings, "status = ?", 1)
 
 	if dbResult.Error != nil {
+		log.Println(dbResult.Error)
 		return nil, model.RequestMessage{
 			Message: "An error occurred, please try again!",
 		}
@@ -93,6 +99,7 @@ func (repo *BookingRepository) FindById(id uuid.UUID) (model.Booking, error) {
 	dbResult := repo.DatabaseConnection.First(&booking, "id = ?", id)
 
 	if dbResult != nil {
+		log.Println(dbResult.Error)
 		return booking, dbResult.Error
 	}
 
@@ -109,6 +116,7 @@ func (repo *BookingRepository) UpdateBooking(booking model.Booking) error {
 	dbResult := repo.DatabaseConnection.Exec(sqlStatementUser, booking.ID, booking.Status)
 
 	if dbResult.Error != nil {
+		log.Println(dbResult.Error)
 		return dbResult.Error
 	}
 
@@ -119,6 +127,7 @@ func (repo *BookingRepository) GetAllReservations(accomodationID uuid.UUID) ([]m
 	reservations := []model.Booking{}
 	result := repo.DatabaseConnection.Where("accomodation_id = ?", accomodationID).Find(&reservations)
 	if result.Error != nil {
+		log.Println(result.Error)
 		return nil, result.Error
 	}
 	return reservations, nil
@@ -134,6 +143,7 @@ func (repo *BookingRepository) CanceledReservation(reservationId uuid.UUID) mode
 	dbResult1 := repo.DatabaseConnection.Exec(sqlStatementBooking, reservationId, model.DECLINED)
 
 	if dbResult1.Error != nil {
+		log.Println(dbResult1.Error)
 		return model.RequestMessage{
 			Message: "An error occured, please try again!",
 		}
@@ -147,6 +157,7 @@ func (repo *BookingRepository) GetUserReservations(userId uuid.UUID) ([]model.Bo
 	reservations := []model.Booking{}
 	result := repo.DatabaseConnection.Where("user_id = ?", userId).Find(&reservations)
 	if result.Error != nil {
+		log.Println(result.Error)
 		return nil, result.Error
 	}
 	return reservations, nil

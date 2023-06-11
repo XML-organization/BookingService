@@ -49,7 +49,7 @@ func (bookingHandler *BookingHandler) CreateBooking(ctx context.Context, in *pb.
 
 	autoApprovalResponse, err := accomodationService.GetAutoApprovalForAccommodation(context.TODO(), &accServicepb.AutoApprovalRequest{AccommodationId: booking.AccomodationID.String()})
 	if err != nil {
-		println(err.Error())
+		log.Println(err)
 		return nil, err
 	}
 
@@ -66,7 +66,9 @@ func (bookingHandler *BookingHandler) CreateBooking(ctx context.Context, in *pb.
 	}
 
 	message, err := bookingHandler.BookingService.CreateBooking(booking)
-
+	if err != nil {
+		log.Println(err)
+	}
 	response := pb.CreateBookingResponse{
 		Message: message.Message,
 	}
@@ -78,6 +80,7 @@ func (bookingHandler *BookingHandler) GetAll(ctx context.Context, empty *booking
 	bookings, requestMessage := bookingHandler.BookingService.GetAllBookings()
 
 	if requestMessage.Message != "Success!" {
+		log.Println(requestMessage)
 		return nil, fmt.Errorf("an error occurred: %s", requestMessage.Message)
 	}
 
@@ -96,6 +99,7 @@ func (bookingHandler *BookingHandler) GetAll(ctx context.Context, empty *booking
 func (bookingHandler *BookingHandler) GetAllOnPending(ctx context.Context, request *booking.GetAllPendingRequest) (*pb.BookingResponse, error) {
 	hostID, err := uuid.Parse(request.HostId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -109,13 +113,14 @@ func (bookingHandler *BookingHandler) GetAllOnPending(ctx context.Context, reque
 
 	accommodations, err := accomodationService.GetAllAccomodations(context.TODO(), &accServicepb.GetAllAccomodationsRequest{HostId: hostID.String()})
 	if err != nil {
-		println(err.Error())
+		log.Println(err)
 		return nil, err
 	}
 
 	bookings, requestMessage := bookingHandler.BookingService.GetAllPendingBookings()
 
 	if requestMessage.Message != "Success!" {
+		log.Println(requestMessage)
 		return nil, fmt.Errorf("an error occurred: %s", requestMessage.Message)
 	}
 
@@ -160,7 +165,9 @@ func (bookingHandler *BookingHandler) Decline(ctx context.Context, in *pb.Create
 
 func (bookingHandler *BookingHandler) Confirm(ctx context.Context, in *pb.CreateBookingRequest) (*pb.CreateBookingResponse, error) {
 	message, err := bookingHandler.BookingService.Confirm(mapBookingFromCreateBookingRequest(in))
-
+	if err != nil {
+		log.Println(err)
+	}
 	return &pb.CreateBookingResponse{
 		Message: message.Message,
 	}, err
@@ -169,11 +176,13 @@ func (bookingHandler *BookingHandler) Confirm(ctx context.Context, in *pb.Create
 func (handler *BookingHandler) GetAllReservations(ctx context.Context, request *pb.ReservationRequest) (*pb.ReservationResponse, error) {
 	accomodationID, err := uuid.Parse(request.AccomodationId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	reservations, err := handler.BookingService.GetAllReservations(accomodationID)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -192,6 +201,9 @@ func (bookingHandler *BookingHandler) CanceledBooking(ctx context.Context, in *p
 	bookingId := mapBookingFromCanceledBookingRequest(in)
 
 	message, err := bookingHandler.BookingService.CanceledReservation(bookingId)
+	if err != nil {
+		log.Println(err)
+	}
 	response := pb.CanceledBookingResponse{
 		Message: message.Message,
 	}
@@ -202,11 +214,13 @@ func (bookingHandler *BookingHandler) CanceledBooking(ctx context.Context, in *p
 func (handler *BookingHandler) GetUserReservations(ctx context.Context, request *pb.UserReservationRequest) (*pb.ReservationResponse, error) {
 	userID, err := uuid.Parse(request.UserId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	reservations, err := handler.BookingService.GetUserReservations(userID)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
