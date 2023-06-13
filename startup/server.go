@@ -12,6 +12,7 @@ import (
 	booking "github.com/XML-organization/common/proto/booking_service"
 	saga "github.com/XML-organization/common/saga/messaging"
 	"github.com/XML-organization/common/saga/messaging/nats"
+	"github.com/neo4j/neo4j-go-driver/neo4j"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -34,12 +35,28 @@ const (
 
 func (server *Server) Start() {
 	postgresClient := server.initPostgresClient()
+	neo4jDriver := server.initNeo4jDriver()
+	bookingNeo4jRepo := server.initBookingNeo4jRepository(neo4jDriver)
 	bookingRepo := server.initBookingRepository(postgresClient)
-	bookingService := server.initBookingService(bookingRepo)
+	bookingService := server.initBookingService(bookingRepo, bookingNeo4jRepo)
 
 	bookingHandler := server.initBookingHandler(bookingService)
 
 	server.startGrpcServer(bookingHandler)
+}
+
+func (server *Server) initNeo4jDriver() *neo4j.Driver {
+	driver, err := repository.GetNeo4jClient("bolt://accommodation_recommendation_db:7687", "neo4j", "password")
+
+	if err != nil {
+		return nil
+	}
+
+	return &driver
+}
+
+func (server *Server) initBookingNeo4jRepository(driver *neo4j.Driver) *repository.BookingNeo4jRepository {
+	return repository.NewBookingNeo4jRepository(*driver)
 }
 
 func (server *Server) initPublisher(subject string) saga.Publisher {
@@ -78,8 +95,8 @@ func (server *Server) initBookingRepository(client *gorm.DB) *repository.Booking
 	return repository.NewBookingRepository(client)
 }
 
-func (server *Server) initBookingService(repo *repository.BookingRepository) *service.BookingService {
-	return service.NewBookingService(repo)
+func (server *Server) initBookingService(repo *repository.BookingRepository, neo4jRepo *repository.BookingNeo4jRepository) *service.BookingService {
+	return service.NewBookingService(repo, neo4jRepo)
 }
 
 func (server *Server) initBookingHandler(service *service.BookingService) *handler.BookingHandler {

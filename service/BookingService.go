@@ -9,12 +9,14 @@ import (
 )
 
 type BookingService struct {
-	BookingRepo *repository.BookingRepository
+	BookingRepo      *repository.BookingRepository
+	BookingNeo4jRepo *repository.BookingNeo4jRepository
 }
 
-func NewBookingService(repo *repository.BookingRepository) *BookingService {
+func NewBookingService(repo *repository.BookingRepository, neo4jRepo *repository.BookingNeo4jRepository) *BookingService {
 	return &BookingService{
-		BookingRepo: repo,
+		BookingRepo:      repo,
+		BookingNeo4jRepo: neo4jRepo,
 	}
 }
 
@@ -24,6 +26,7 @@ func (service *BookingService) GuestHasReservationInPast(ids []string, guestId s
 }
 
 func (service *BookingService) CreateBooking(booking model.Booking) (model.RequestMessage, error) {
+	service.BookingNeo4jRepo.SaveBooking(booking)
 
 	response := model.RequestMessage{
 		Message: service.BookingRepo.Create(booking).Message,
