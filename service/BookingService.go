@@ -128,3 +128,18 @@ func (service *BookingService) GetUserReservations(userID uuid.UUID) ([]model.Bo
 	}
 	return reservations, nil
 }
+
+func (service *BookingService) GetFinishedReservations(userID uuid.UUID) ([]model.Booking, error) {
+	reservations, err := service.BookingRepo.GetUserReservations(userID)
+	var confirmedReservations []model.Booking
+	for _, reservation := range reservations {
+		if reservation.Status == model.CONFIRMED {
+			confirmedReservations = append(confirmedReservations, reservation)
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return confirmedReservations, nil
+}
