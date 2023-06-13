@@ -2,6 +2,7 @@ package handler
 
 import (
 	"booking-service/model"
+	"log"
 	"time"
 
 	pb "github.com/XML-organization/common/proto/booking_service"
@@ -18,37 +19,41 @@ func mapBookingFromCreateBookingRequest(booking *pb.CreateBookingRequest) model.
 	println("User id: " + booking.UserID)
 	bookingID, err := uuid.Parse(booking.Id)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	accomodationID, err := uuid.Parse(booking.AccomodationID)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	userID, err := uuid.Parse(booking.UserID)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	num, err := strconv.Atoi(booking.GuestNumber)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	layout := "2006-01-02"
 
 	startDate, err := time.Parse(layout, booking.StartDate)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	endDate, err := time.Parse(layout, booking.EndDate)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	statusInt, err := strconv.Atoi(booking.Status)
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	return model.Booking{
 		ID:             bookingID,
@@ -94,7 +99,7 @@ func mapBookingFromCanceledBookingRequest(booking *pb.CanceledBookingRequest) uu
 
 	bookingID, err := uuid.Parse(booking.Id)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	return bookingID

@@ -112,7 +112,7 @@ func (server *Server) startGrpcServer(bookingHandler *handler.BookingHandler) {
 	grpcServer := grpc.NewServer(opts...)
 	booking.RegisterBookingServiceServer(grpcServer, bookingHandler)
 	reflection.Register(grpcServer)
-	println("GRPC BOOKING SERVER USPJESNO NAPRAVLJEN")
+	log.Println("GRPC BOOKING SERVER USPJESNO NAPRAVLJEN")
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %s", err)
 		println("GRPC BOOKING SERVER NIJE USPJESNO NAPRAVLJEN")
