@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"fmt"
-
 	"log"
 
 	"booking-service/model"
@@ -232,4 +231,90 @@ func (handler *BookingHandler) GetUserReservations(ctx context.Context, request 
 		response.Reservations = append(response.Reservations, current)
 	}
 	return response, nil
+}
+
+func (handler *BookingHandler) IsExceptional(ctx context.Context, in *pb.IsExceptionalRequest) (*pb.IsExceptionalResponse, error) {
+	println("Usao sam u Booking Service---------")
+	println("HostID u Booking Servicu: ", in.UserId)
+
+	conn, err := grpc.Dial("accomodation-service:8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	accomodationService := accServicepb.NewAccommodationServiceClient(conn)
+
+	accommodations, err := accomodationService.GetAllAccomodations(context.TODO(), &accServicepb.GetAllAccomodationsRequest{HostId: in.UserId})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	bookings, _ := handler.BookingService.GetAllBookings()
+
+	var cancelCnt float64 = 0
+	var confirmCnt float64 = 0
+	var days = 0
+
+	println("Bookings:")
+	for j, tmp := range bookings {
+		println(j, ". Accomodation ID", tmp.AccomodationID.String())
+	}
+
+	println("Accomodations:")
+	for j, tmp := range accommodations.Accomodations {
+		println(j, ". Accomodation ID", tmp.IdHost)
+	}
+
+	for _, book := range bookings {
+		println("Usao u prvi for.")
+		for i, accommodation := range accommodations.Accomodations {
+			println("------------------- ", i)
+			println("accommodation.Id:", accommodation.Id, ".")
+			println("book.ID:", book.AccomodationID.String(), ".")
+			_, err := uuid.Parse(accommodation.Id)
+			if err != nil {
+				log.Println(err)
+				return nil, err
+			}
+
+			if accommodation.Id == book.AccomodationID.String() {
+				println("PROSAO")
+				println("book.status: ", book.Status)
+				println("model.CONFIRMED: ", model.CONFIRMED)
+				if book.Status == model.CONFIRMED {
+					println("Usao u CONFIRMED")
+					confirmCnt = confirmCnt + 1
+					days = days + (int(book.EndDate.Sub(book.StartDate).Hours() / 24))
+					println("Trenutno potvrdjenih rezervacija:", confirmCnt)
+					println("Trenutno ukupno dana:", days)
+				} else if book.Status == model.CANCELED {
+					println("Usao u CANCELED")
+					cancelCnt = cancelCnt + 1
+					println("Trenutno odbijenih rezervacija:", cancelCnt)
+				}
+			}
+		}
+	}
+
+	var cancelPer float64 = cancelCnt / (cancelCnt + confirmCnt)
+
+	println("cancelCnt: ", cancelCnt)
+	println("confirmCnt: ", confirmCnt)
+	println("days: ", days)
+
+	var threshold = 0.05
+	if confirmCnt >= 5 && days > 50 && cancelPer < threshold {
+		response := pb.IsExceptionalResponse{
+			IsExceptional: true,
+		}
+		return &response, err
+	} else {
+		response := pb.IsExceptionalResponse{
+			IsExceptional: false,
+		}
+		return &response, err
+	}
+
 }

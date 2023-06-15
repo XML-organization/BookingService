@@ -140,7 +140,7 @@ func (repo *BookingRepository) CanceledReservation(reservationId uuid.UUID) mode
 		SET status = $2
 		WHERE id = $1;`
 
-	dbResult1 := repo.DatabaseConnection.Exec(sqlStatementBooking, reservationId, model.DECLINED)
+	dbResult1 := repo.DatabaseConnection.Exec(sqlStatementBooking, reservationId, model.CANCELED)
 
 	if dbResult1.Error != nil {
 		log.Println(dbResult1.Error)
