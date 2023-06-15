@@ -14,6 +14,9 @@ import (
 
 func mapBookingFromCreateBookingRequest(booking *pb.CreateBookingRequest) model.Booking {
 
+	println("Booking id: " + booking.Id)
+	println("Accomodation id: " + booking.AccomodationID)
+	println("User id: " + booking.UserID)
 	bookingID, err := uuid.Parse(booking.Id)
 	if err != nil {
 		log.Println(err)
