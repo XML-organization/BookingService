@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"booking-service/model"
 	"booking-service/service"
@@ -11,6 +12,7 @@ import (
 	accServicepb "github.com/XML-organization/common/proto/accomodation_service"
 	booking "github.com/XML-organization/common/proto/booking_service"
 	pb "github.com/XML-organization/common/proto/booking_service"
+	userServicepb "github.com/XML-organization/common/proto/user_service"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -51,6 +53,7 @@ func (bookingHandler *BookingHandler) CreateBooking(ctx context.Context, in *pb.
 		log.Println(err)
 		return nil, err
 	}
+	accommodation, err := accomodationService.GetOneAccomodation(context.TODO(), &accServicepb.GetOneAccomodationRequest{AccomodationId: booking.AccomodationID.String()})
 
 	println(autoApprovalResponse.AutoApproval)
 
@@ -62,6 +65,23 @@ func (bookingHandler *BookingHandler) CreateBooking(ctx context.Context, in *pb.
 		booking.Status = model.PENDING
 		println(booking.Status)
 		println("usao u FALSE")
+		//slanje notifikacije
+
+		conn, err := grpc.Dial("user_service:8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer conn.Close()
+
+		userService := userServicepb.NewUserServiceClient(conn)
+
+		saveResponse, err := userService.SaveNotification(context.TODO(), &userServicepb.SaveRequest{Id: uuid.NewString(), NotificationTime: time.Now().Format("2006-01-02 15:04:05"), Text: "Imate novi zahtjev za rezervaciju u" + accommodation.Accomodation.Name + " !", UserID: accommodation.Accomodation.IdHost, Status: "0"})
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		println(saveResponse.Message)
+
 	}
 
 	message, err := bookingHandler.BookingService.CreateBooking(booking)
@@ -155,7 +175,24 @@ func (bookingHandler *BookingHandler) GetAllOnPending(ctx context.Context, reque
 }
 
 func (bookingHandler *BookingHandler) Decline(ctx context.Context, in *pb.CreateBookingRequest) (*pb.CreateBookingResponse, error) {
-	message, err := bookingHandler.BookingService.Decline(mapBookingFromCreateBookingRequest(in))
+	booking := mapBookingFromCreateBookingRequest(in)
+	message, err := bookingHandler.BookingService.Decline(booking)
+	//slanje notifikacije
+
+	conn, err := grpc.Dial("user_service:8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	userService := userServicepb.NewUserServiceClient(conn)
+
+	saveResponse, err := userService.SaveNotification(context.TODO(), &userServicepb.SaveRequest{Id: uuid.NewString(), NotificationTime: time.Now().Format("2006-01-02 15:04:05"), Text: "Imate novi odgovor na zahtjev za rezervaciju !", UserID: booking.UserID.String(), Status: "0"})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	println(saveResponse.Message)
 
 	return &pb.CreateBookingResponse{
 		Message: message.Message,
@@ -167,6 +204,7 @@ func (bookingHandler *BookingHandler) Confirm(ctx context.Context, in *pb.Create
 	if err != nil {
 		log.Println(err)
 	}
+
 	return &pb.CreateBookingResponse{
 		Message: message.Message,
 	}, err
@@ -199,10 +237,39 @@ func (bookingHandler *BookingHandler) CanceledBooking(ctx context.Context, in *p
 
 	bookingId := mapBookingFromCanceledBookingRequest(in)
 
+	booking, _ := bookingHandler.BookingService.BookingRepo.FindById(bookingId)
+
 	message, err := bookingHandler.BookingService.CanceledReservation(bookingId)
 	if err != nil {
 		log.Println(err)
 	}
+
+	//slanje notifikacije
+
+	conn, err := grpc.Dial("accomodation-service:8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	accomodationService := accServicepb.NewAccommodationServiceClient(conn)
+	accommodation, err := accomodationService.GetOneAccomodation(context.TODO(), &accServicepb.GetOneAccomodationRequest{AccomodationId: booking.AccomodationID.String()})
+
+	conn1, err1 := grpc.Dial("user_service:8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err1 != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	userService := userServicepb.NewUserServiceClient(conn1)
+
+	saveResponse, err := userService.SaveNotification(context.TODO(), &userServicepb.SaveRequest{Id: uuid.NewString(), NotificationTime: time.Now().Format("2006-01-02 15:04:05"), Text: "Korisnik je otkazao smjestaj u  " + accommodation.Accomodation.Name + " od " + booking.StartDate.Format("2006-01-02 15:04:05") + " do " + booking.EndDate.Format("2006-01-02 15:04:05") + "!", UserID: accommodation.Accomodation.IdHost, Status: "0"})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	println(saveResponse.Message)
+
 	response := pb.CanceledBookingResponse{
 		Message: message.Message,
 	}
