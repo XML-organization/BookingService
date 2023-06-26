@@ -6,4 +6,5 @@ const (
 	CONFIRMED Status = iota
 	PENDING
 	DECLINED
+	CANCELED
 )
